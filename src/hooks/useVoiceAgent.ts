@@ -82,8 +82,9 @@ export function useVoiceAgent() {
     setState(prev => ({ ...prev, voiceState: 'thinking', currentTranscript: '' }));
 
     try {
-      // STT
-      const sttResult = await sendAudioToSTT(blob, state.detectedLanguage.code);
+      // STT: Pass 'unknown' to auto-detect Telugu/Hindi/English or explicit if selected
+      const sttLang = state.detectedLanguage.code !== 'en-IN' ? state.detectedLanguage.code : 'unknown';
+      const sttResult = await sendAudioToSTT(blob, sttLang);
 
       if (sttResult.error) {
         setState(prev => ({
@@ -105,11 +106,12 @@ export function useVoiceAgent() {
 
       const transcript = sttResult.transcript;
 
-      // Update detected language if confident
-      if (sttResult.language_code && sttResult.language_code !== 'unknown' && sttResult.language_probability > 0.5) {
+      // Update detected language automatically
+      if (sttResult.language_code && sttResult.language_code !== 'unknown') {
+        const recognizedLang = findLanguage(sttResult.language_code);
         setState(prev => ({
           ...prev,
-          detectedLanguage: findLanguage(sttResult.language_code),
+          detectedLanguage: recognizedLang,
         }));
       }
 
@@ -311,13 +313,24 @@ export function useVoiceAgent() {
   };
 
   // ── Public actions ────────────────────────────────────────────────
+  const selectLanguage = useCallback((code: string) => {
+    const lang = findLanguage(code);
+    setState(prev => ({ ...prev, detectedLanguage: lang }));
+  }, []);
+
   const startConversation = useCallback(async () => {
     // Synchronously unlock audio on mobile before any async fetches
     unlockAudio();
 
     setState(prev => ({ ...prev, voiceState: 'speaking', error: null, stage: 'introduction' }));
 
-    const welcomeText = 'Namaste! Welcome to Paytm. I will help you set up your business. Are you already running a shop, or are you planning to open one?';
+    const currentLang = state.detectedLanguage.code;
+    let welcomeText = 'Namaste! Welcome to Paytm. I will help you set up your business. Are you already running a shop, or are you planning to open one?';
+    if (currentLang === 'te-IN') {
+      welcomeText = 'నమస్కారం! పేటీఎమ్‌కి స్వాగతం. మీ వ్యాపారాన్ని సెటప్ చేయడానికి నేను సహాయం చేస్తాను. మీకు ఇప్పటికే దుకాణం ఉందా, లేదా కొత్తగా ప్రారంభించబోతున్నారా?';
+    } else if (currentLang === 'hi-IN') {
+      welcomeText = 'नमस्ते! पेटीएम में आपका स्वागत है। मैं आपकी दुकान का रजिस्ट्रेशन करने में मदद करूँगा। क्या आपकी पहले से दुकान है, या आप नई दुकान खोलने जा रहे हैं?';
+    }
 
     const welcomeMsg: ChatMessage = {
       id: generateId('ai'),
@@ -325,14 +338,14 @@ export function useVoiceAgent() {
       content: welcomeText,
       timestamp: new Date(),
       type: 'text',
-      language: 'en-IN',
+      language: currentLang,
     };
 
     setState(prev => ({ ...prev, messages: [...prev.messages, welcomeMsg] }));
     historyRef.current.push({ role: 'assistant', content: welcomeText });
 
     try {
-      const ttsResult = await requestTTS(welcomeText, 'en-IN');
+      const ttsResult = await requestTTS(welcomeText, currentLang);
       if (ttsResult.audio) {
         lastTtsAudioRef.current = ttsResult.audio;
         await playAudio(ttsResult.audio);
@@ -344,7 +357,7 @@ export function useVoiceAgent() {
     // Start listening
     setState(prev => ({ ...prev, voiceState: 'listening' }));
     setTimeout(() => startRecording(), 300);
-  }, [playAudio, startRecording]);
+  }, [state.detectedLanguage.code, unlockAudio, playAudio, startRecording]);
 
   const stopConversation = useCallback(() => {
     cancelRecording();
@@ -522,6 +535,7 @@ export function useVoiceAgent() {
     recorderError,
     audioLevel,
     progress,
+    selectLanguage,
     startConversation,
     stopConversation,
     repeatLastResponse,

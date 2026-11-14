@@ -42,10 +42,24 @@ export default function VoiceOnboarding() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Language badge */}
-            <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-50 border border-gray-100">
-              <span className="text-[10px]">🌐</span>
-              <span className="text-[10px] font-medium text-gray-600">{agent.detectedLanguage.name}</span>
+            {/* Language selector */}
+            <div className="relative">
+              <select
+                value={agent.detectedLanguage.code}
+                onChange={(e) => agent.selectLanguage(e.target.value)}
+                className="appearance-none bg-blue-50/80 border border-blue-200 rounded-full px-2.5 py-1 pr-5 text-[11px] font-semibold text-[#0070C0] focus:outline-none focus:ring-1 focus:ring-[#00B9F5] cursor-pointer"
+              >
+                <option value="te-IN">🇮🇳 తెలుగు</option>
+                <option value="hi-IN">🇮🇳 हिन्दी</option>
+                <option value="en-IN">🇬🇧 English</option>
+                <option value="ta-IN">🇮🇳 தமிழ்</option>
+                <option value="kn-IN">🇮🇳 ಕನ್ನಡ</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1.5 text-blue-500">
+                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
 
             {/* Mode badge */}
@@ -76,9 +90,43 @@ export default function VoiceOnboarding() {
             <h1 className="text-2xl font-bold text-gray-900 mb-3">
               Welcome to Paytm AI<br />Merchant Onboarding
             </h1>
-            <p className="text-sm text-gray-500 mb-8 leading-relaxed">
+            <p className="text-sm text-gray-500 mb-5 leading-relaxed">
               Let&apos;s get your shop registered. You can simply<br />talk to me in your language.
             </p>
+
+            {/* Quick language selection pills */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <button
+                onClick={() => agent.selectLanguage('te-IN')}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  agent.detectedLanguage.code === 'te-IN'
+                    ? 'bg-[#00B9F5] text-white shadow-md'
+                    : 'bg-white border border-gray-200 text-gray-700 hover:border-[#00B9F5]'
+                }`}
+              >
+                🇮🇳 తెలుగు (Telugu)
+              </button>
+              <button
+                onClick={() => agent.selectLanguage('hi-IN')}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  agent.detectedLanguage.code === 'hi-IN'
+                    ? 'bg-[#00B9F5] text-white shadow-md'
+                    : 'bg-white border border-gray-200 text-gray-700 hover:border-[#00B9F5]'
+                }`}
+              >
+                🇮🇳 हिन्दी
+              </button>
+              <button
+                onClick={() => agent.selectLanguage('en-IN')}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  agent.detectedLanguage.code === 'en-IN'
+                    ? 'bg-[#00B9F5] text-white shadow-md'
+                    : 'bg-white border border-gray-200 text-gray-700 hover:border-[#00B9F5]'
+                }`}
+              >
+                🇬🇧 English
+              </button>
+            </div>
           </div>
         )}
 
