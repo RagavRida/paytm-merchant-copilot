@@ -11,6 +11,7 @@ import { useVoiceAgent } from '@/hooks/useVoiceAgent';
 export default function VoiceOnboarding() {
   const agent = useVoiceAgent();
   const [textInput, setTextInput] = useState('');
+  const [showLangMenu, setShowLangMenu] = useState(false);
 
   const handleTextSend = () => {
     const trimmed = textInput.trim();
@@ -42,25 +43,70 @@ export default function VoiceOnboarding() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Language selector */}
+            {/* Custom Language selector (no native select to avoid browser autofill injections) */}
             <div className="relative">
-              <select
-                suppressHydrationWarning
-                value={agent.detectedLanguage.code}
-                onChange={(e) => agent.selectLanguage(e.target.value)}
-                className="appearance-none bg-blue-50/80 border border-blue-200 rounded-full px-2.5 py-1 pr-5 text-[11px] font-semibold text-[#0070C0] focus:outline-none focus:ring-1 focus:ring-[#00B9F5] cursor-pointer"
+              <button
+                type="button"
+                onClick={() => setShowLangMenu(!showLangMenu)}
+                className="flex items-center gap-1.5 bg-blue-50/80 border border-blue-200 rounded-full px-2.5 py-1 text-[11px] font-semibold text-[#0070C0] hover:bg-blue-100/70 transition-colors"
               >
-                <option value="te-IN">🇮🇳 తెలుగు</option>
-                <option value="hi-IN">🇮🇳 हिन्दी</option>
-                <option value="en-IN">🇬🇧 English</option>
-                <option value="ta-IN">🇮🇳 தமிழ்</option>
-                <option value="kn-IN">🇮🇳 ಕನ್ನಡ</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1.5 text-blue-500">
-                <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span>
+                  {agent.detectedLanguage.code === 'te-IN'
+                    ? '🇮🇳 తెలుగు'
+                    : agent.detectedLanguage.code === 'hi-IN'
+                    ? '🇮🇳 हिन्दी'
+                    : agent.detectedLanguage.code === 'ta-IN'
+                    ? '🇮🇳 தமிழ்'
+                    : agent.detectedLanguage.code === 'kn-IN'
+                    ? '🇮🇳 ಕನ್ನಡ'
+                    : '🇬🇧 English'}
+                </span>
+                <svg
+                  className={`w-2.5 h-2.5 transition-transform ${showLangMenu ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </div>
+              </button>
+
+              {showLangMenu && (
+                <div className="absolute right-0 mt-1.5 w-36 bg-white border border-gray-100 rounded-xl shadow-lg shadow-gray-200/50 py-1 z-50 animate-fadeIn">
+                  {[
+                    { code: 'te-IN', label: '🇮🇳 తెలుగు' },
+                    { code: 'hi-IN', label: '🇮🇳 हिन्दी' },
+                    { code: 'en-IN', label: '🇬🇧 English' },
+                    { code: 'ta-IN', label: '🇮🇳 தமிழ்' },
+                    { code: 'kn-IN', label: '🇮🇳 ಕನ್ನಡ' },
+                  ].map((item) => (
+                    <button
+                      key={item.code}
+                      type="button"
+                      onClick={() => {
+                        agent.selectLanguage(item.code);
+                        setShowLangMenu(false);
+                      }}
+                      className={`w-full text-left px-3 py-1.5 text-xs font-medium transition-colors flex items-center justify-between ${
+                        agent.detectedLanguage.code === item.code
+                          ? 'bg-blue-50 text-[#00B9F5] font-semibold'
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      {agent.detectedLanguage.code === item.code && (
+                        <svg className="w-3 h-3 text-[#00B9F5]" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Mode badge */}
