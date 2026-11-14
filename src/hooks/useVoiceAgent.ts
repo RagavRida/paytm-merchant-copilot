@@ -72,7 +72,7 @@ export function useVoiceAgent() {
   const processingRef = useRef(false);
   const lastTtsAudioRef = useRef<string | null>(null);
 
-  const { isPlaying, playAudio, stopPlayback, replayLast } = useAudioPlayer();
+  const { isPlaying, playAudio, stopPlayback, replayLast, unlockAudio } = useAudioPlayer();
 
   // Handle audio ready from recorder
   const handleAudioReady = useCallback(async (blob: Blob) => {
@@ -304,6 +304,9 @@ export function useVoiceAgent() {
 
   // ── Public actions ────────────────────────────────────────────────
   const startConversation = useCallback(async () => {
+    // Synchronously unlock audio on mobile before any async fetches
+    unlockAudio();
+
     setState(prev => ({ ...prev, voiceState: 'speaking', error: null, stage: 'introduction' }));
 
     const welcomeText = 'Namaste! Welcome to Paytm. I will help you set up your business. Are you already running a shop, or are you planning to open one?';
@@ -342,6 +345,7 @@ export function useVoiceAgent() {
   }, [cancelRecording, stopPlayback]);
 
   const repeatLastResponse = useCallback(async () => {
+    unlockAudio();
     if (lastTtsAudioRef.current) {
       setState(prev => ({ ...prev, voiceState: 'speaking' }));
       await replayLast();
