@@ -19,21 +19,6 @@ export default function VoiceOnboarding() {
     setTextInput('');
   };
 
-  if (!agent.initialized) {
-    return (
-      <div className="h-full flex items-center justify-center bg-white">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#00B9F5] to-[#0070C0] flex items-center justify-center shadow-lg animate-pulse">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" fill="white" opacity="0.9" />
-            </svg>
-          </div>
-          <p className="text-sm text-gray-400 font-medium">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-white to-gray-50/50">
       {/* ── Header ─────────────────────────────────────────────── */}

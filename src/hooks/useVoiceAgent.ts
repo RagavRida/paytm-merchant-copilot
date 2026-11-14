@@ -62,12 +62,12 @@ export function useVoiceAgent() {
     error: null,
     cameraAction: null,
     currentTranscript: '',
-    aiMode: 'loading',
+    aiMode: 'ai',
     showTranscript: false,
     showTextInput: false,
   });
 
-  const [initialized, setInitialized] = useState(false);
+  const [initialized, setInitialized] = useState(true);
   const historyRef = useRef<Array<{ role: 'user' | 'assistant'; content: string }>>([]);
   const processingRef = useRef(false);
   const lastTtsAudioRef = useRef<string | null>(null);
