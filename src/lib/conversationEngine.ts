@@ -166,3 +166,4 @@ export function getStepProgress(step: OnboardingStep): number {
   if (index === -1) return 0;
   return Math.round((index / (steps.length - 1)) * 100);
 }
+
