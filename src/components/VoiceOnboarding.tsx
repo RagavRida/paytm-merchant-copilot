@@ -45,6 +45,7 @@ export default function VoiceOnboarding() {
             {/* Language selector */}
             <div className="relative">
               <select
+                suppressHydrationWarning
                 value={agent.detectedLanguage.code}
                 onChange={(e) => agent.selectLanguage(e.target.value)}
                 className="appearance-none bg-blue-50/80 border border-blue-200 rounded-full px-2.5 py-1 pr-5 text-[11px] font-semibold text-[#0070C0] focus:outline-none focus:ring-1 focus:ring-[#00B9F5] cursor-pointer"
@@ -306,6 +307,7 @@ export default function VoiceOnboarding() {
         {agent.showTextInput && (
           <div className="flex items-center gap-2 mt-2 animate-fadeIn">
             <input
+              suppressHydrationWarning
               type="text"
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
