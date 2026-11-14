@@ -85,13 +85,21 @@ export function useVoiceAgent() {
       // STT
       const sttResult = await sendAudioToSTT(blob, state.detectedLanguage.code);
 
-      if (sttResult.error || !sttResult.transcript) {
+      if (sttResult.error) {
         setState(prev => ({
           ...prev,
           voiceState: 'error',
-          error: sttResult.error || 'Could not understand audio. Please try again.',
+          error: sttResult.error || 'Speech recognition failed',
         }));
         processingRef.current = false;
+        return;
+      }
+
+      if (!sttResult.transcript || !sttResult.transcript.trim()) {
+        // No speech detected — seamlessly return to listening
+        setState(prev => ({ ...prev, voiceState: 'listening', error: null }));
+        processingRef.current = false;
+        setTimeout(() => startRecording(), 300);
         return;
       }
 
