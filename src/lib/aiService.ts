@@ -42,7 +42,7 @@ export async function sendAudioToSTT(
   language: string = 'unknown'
 ): Promise<STTResult> {
   const formData = new FormData();
-  formData.append('audio', audioBlob, 'recording.webm');
+  formData.append('audio', audioBlob, 'recording.wav');
   formData.append('language', language);
 
   const response = await fetch('/api/voice/stt', {

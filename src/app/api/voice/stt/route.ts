@@ -24,11 +24,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Default to audio/wav (pure PCM WAV recording)
+    let rawType = (audioFile.type || 'audio/wav').split(';')[0].trim().toLowerCase();
+    let cleanType = 'audio/wav';
+    let fileExt = 'wav';
+
+    if (rawType.includes('wav')) {
+      cleanType = 'audio/wav';
+      fileExt = 'wav';
+    } else if (rawType.includes('mp4') || rawType.includes('m4a') || rawType.includes('aac')) {
+      cleanType = 'audio/mp4';
+      fileExt = 'mp4';
+    } else if (rawType.includes('webm')) {
+      cleanType = 'audio/webm';
+      fileExt = 'webm';
+    }
+
+    const audioBuffer = Buffer.from(await audioFile.arrayBuffer());
+    const audioBlob = new Blob([audioBuffer], { type: cleanType });
+    const fileName = `recording.${fileExt}`;
+
     // Build form data for Sarvam STT
     const sarvamForm = new FormData();
-    const audioBuffer = Buffer.from(await audioFile.arrayBuffer());
-    const audioBlob = new Blob([audioBuffer], { type: audioFile.type || 'audio/webm' });
-    const fileName = audioFile.name || 'recording.webm';
     sarvamForm.append('file', audioBlob, fileName);
     sarvamForm.append('model', 'saaras:v4');
     sarvamForm.append('language_code', language === 'unknown' ? 'unknown' : language);
